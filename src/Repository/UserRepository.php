@@ -26,6 +26,7 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
  */
 class UserRepository extends ServiceEntityRepository implements UserProviderInterface
 {
+
     /**
      * UserRepository constructor.
      *

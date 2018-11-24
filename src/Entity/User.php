@@ -6,7 +6,9 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -15,6 +17,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  *
  * @ORM\Table(name="users")
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
+ *
  * @package App\Entity
  */
 class User extends DataBaseEntity implements UserInterface, \Serializable
@@ -52,6 +55,27 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
     private $password;
 
     /**
+     * @var PersistentCollection
+     *
+     * @ORM\OneToMany(targetEntity="App\Entity\Session", mappedBy="user")
+     */
+    private $session;
+
+    /**
+     * @var PersistentCollection
+     *
+     * @ORM\OneToMany(targetEntity="App\Entity\History", mappedBy="user")
+     */
+    private $history;
+
+    /**
+     * @var PersistentCollection
+     *
+     * @ORM\OneToMany(targetEntity="App\Entity\Borrow", mappedBy="user")
+     */
+    private $borrow;
+
+    /**
      * User constructor.
      *
      * @param array $data
@@ -59,6 +83,49 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
     public function __construct(array $data = [])
     {
         parent::__construct($data);
+        $this->session = new ArrayCollection();
+        $this->history = new ArrayCollection();
+        $this->borrow = new ArrayCollection();
+    }
+
+    /**
+     * @return PersistentCollection|null
+     */
+    public function getSession(): ?PersistentCollection
+    {
+        return $this->session;
+    }
+
+    /**
+     * @param Session $session
+     *
+     * @return User
+     */
+    public function setSession(Session $session): self
+    {
+        $this->session[] = $session;
+
+        return $this;
+    }
+
+    /**
+     * @return PersistentCollection
+     */
+    public function getHistory(): ?PersistentCollection
+    {
+        return $this->history;
+    }
+
+    /**
+     * @param PersistentCollection $history
+     *
+     * @return User
+     */
+    public function setHistory(PersistentCollection $history): self
+    {
+        $this->history = $history;
+
+        return $this;
     }
 
     /**
@@ -91,6 +158,26 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
     public function getEmail(): ?string
     {
         return $this->email;
+    }
+
+    /**
+     * @return PersistentCollection
+     */
+    public function getBorrow(): ?PersistentCollection
+    {
+        return $this->borrow;
+    }
+
+    /**
+     * @param PersistentCollection $borrow
+     *
+     * @return User
+     */
+    public function setBorrow(PersistentCollection $borrow): self
+    {
+        $this->borrow = $borrow;
+
+        return $this;
     }
 
     /**
@@ -202,7 +289,9 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
                 $this->roles,
                 $this->password,
                 $this->created,
-                $this->modified
+                $this->modified,
+                $this->session,
+                $this->history
             ]
         );
     }
@@ -225,7 +314,9 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
             $this->roles,
             $this->password,
             $this->created,
-            $this->modified) = unserialize($serialized, ['allowed_classes' => false]);
+            $this->modified,
+            $this->session,
+            $this->history) = unserialize($serialized, ['allowed_classes' => false]);
     }
 
 }

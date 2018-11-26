@@ -24,6 +24,7 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
 {
     const MODEL = 'User';
     const LENGTH_UNIQUE = 12;
+    const ROLE_USER = 'ROLE_USER';
 
     /**
      * @var array
@@ -53,6 +54,13 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
      * @ORM\Column(type="string", length=255)
      */
     private $password;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=255, unique=true)
+     */
+    private $token;
 
     /**
      * @var PersistentCollection
@@ -201,6 +209,26 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
     }
 
     /**
+     * @return string
+     */
+    public function getToken(): string
+    {
+        return $this->token;
+    }
+
+    /**
+     * @param string $token
+     *
+     * @return User
+     */
+    public function setToken(string $token): self
+    {
+        $this->token = $token;
+
+        return $this;
+    }
+
+    /**
      * Returns the roles granted to the user.
      *
      * <code>
@@ -291,7 +319,8 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
                 $this->created,
                 $this->modified,
                 $this->session,
-                $this->history
+                $this->history,
+                $this->token
             ]
         );
     }
@@ -316,7 +345,8 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
             $this->created,
             $this->modified,
             $this->session,
-            $this->history) = unserialize($serialized, ['allowed_classes' => false]);
+            $this->history,
+            $this->token) = unserialize($serialized, ['allowed_classes' => false]);
     }
 
 }

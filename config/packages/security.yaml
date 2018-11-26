@@ -2,24 +2,27 @@
 # http://symfony.com/doc/current/security.html
 security:
 
-    # http://symfony.com/doc/current/security.html#b-configuring-how-users-are-loaded
-    providers:
-        in_memory:
-            memory: ~
+  # http://symfony.com/doc/current/security.html#b-configuring-how-users-are-loaded
+  providers:
+    in_memory:
+      memory: ~
 
-        service_provider:
-            id: service_provider
+    service_provider:
+      id: service_provider
 
-    firewalls:
-        public:
-            pattern: ^/hello$
-            security: false
+  firewalls:
+    public:
+      pattern: ^/hello$
+      security: false
 
-        api_key:
-            # api key access for other microservices
-            pattern: ~
-            stateless: true
-            simple_preauth:
-                authenticator: service_authenticator
-            provider: service_provider
-
+   # api_key:
+      # api key access for other microservices
+    #  pattern: ~
+     # stateless: true
+     # simple_preauth:
+     #   authenticator: service_authenticator
+     # provider: service_provider
+  encoders:
+    App\Entity\User:
+      algorithm: bcrypt
+      cost: 12

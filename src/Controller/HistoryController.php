@@ -7,10 +7,12 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * Class HistoryController
  *
+ * @Route("/api/history")
  * @package App\Controller
  */
 class HistoryController extends AbstractController

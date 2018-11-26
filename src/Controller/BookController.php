@@ -7,10 +7,12 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * Class BookController
  *
+ * @Route("/api/book")
  * @package App\Controller
  */
 class BookController extends AbstractController

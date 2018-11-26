@@ -1,29 +1,35 @@
 version: '2'
 
 services:
-    db:
-        image: mysql
-        environment:
-            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-            MYSQL_DATABASE: ${MYSQL_DATABASE}
-            MYSQL_USER: ${MYSQL_USER}
-            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    php:
-        build: ./.docker/php-fpm
-        expose:
-            - "9001"
-        volumes:
-            - ./:/var/www/application:cached
-            - ./var/logs/symfony:/var/www/application/var/logs:cached
-        links:
-            - db
-    nginx:
-        build: ./.docker/nginx
-        ports:
-            - "80:80"
-        links:
-            - php
-        volumes_from:
-            - php
-        volumes:
-            - ./var/logs/nginx/:/var/log/nginx:cached
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    expose:
+      - 3306
+    restart: always
+  php:
+    build: ./.docker/php-fpm
+    ports:
+      - 9001:9000
+    volumes:
+      - ./:/var/www/application:cached
+      - ./var/logs/symfony:/var/www/application/var/logs:cached
+    links:
+      - db
+  nginx:
+    build: ./.docker/nginx
+    ports:
+      - 80:80
+    links:
+      - php
+    volumes_from:
+      - php
+    volumes:
+      - ./var/logs/nginx/:/var/log/nginx:cached
+
+#172.18.xx.0
+#172.18.xx.1

@@ -7,10 +7,12 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * Class BorrowController
  *
+ * @Route("/api/borrow")
  * @package App\Controller
  */
 class BorrowController extends AbstractController

@@ -7,10 +7,12 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * Class SessionController
  *
+ * @Route("/api/session")
  * @package App\Controller
  */
 class SessionController extends AbstractController

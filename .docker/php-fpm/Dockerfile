@@ -16,12 +16,16 @@ RUN apk add --update \
     php7-mbstring \
     php7-opcache \
     php7-openssl \
+    php7-soap \
     php7-pdo \
-    php7-pdo_mysql \
-    php7-mysqli \
+    php7-pgsql \
+    php7-pdo_pgsql \
     php7-xml \
+    php7-sockets \
     php7-zlib \
     php7-phar \
+    php7-zip \
+    php7-ftp \
     php7-tokenizer \
     php7-session \
     php7-simplexml \

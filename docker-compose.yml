@@ -9,27 +9,41 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     expose:
-      - 3306
+    - "3306"
     restart: always
+    networks:
+    - bridge
   php:
     build: ./.docker/php-fpm
     ports:
-      - 9001:9000
+    - "9001:9000"
     volumes:
-      - ./:/var/www/application:cached
-      - ./var/logs/symfony:/var/www/application/var/logs:cached
+    - ./:/var/www/application:cached
+    - ./var/logs/symfony:/var/www/application/var/logs:cached
     links:
-      - db
+    - db
+    extra_hosts:
+    - "docker.host:172.66.0.1"
+    networks:
+    - bridge
   nginx:
     build: ./.docker/nginx
     ports:
-      - 80:80
+    - "80:80"
     links:
-      - php
+    - php
     volumes_from:
-      - php
+    - php
     volumes:
-      - ./var/logs/nginx/:/var/log/nginx:cached
+    - ./var/logs/nginx/:/var/log/nginx:cached
+    networks:
+    - bridge
 
-#172.18.xx.0
-#172.18.xx.1
+networks:
+  bridge:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: "172.66.0.1/16"
+        gateway: "172.66.0.1"

@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://api/users/create",
+  "type": "object",
+  "properties": {
+    "username": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 64
+    },
+    "email": {
+      "type": "string",
+      "maxLength": 64,
+      "format": "email"
+    },
+    "password": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 20
+    }
+  },
+  "required": [
+    "username",
+    "email",
+    "password"
+  ],
+  "additionalProperties": false
+}

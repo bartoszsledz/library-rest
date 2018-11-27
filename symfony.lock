@@ -77,6 +77,9 @@
     "ocramius/proxy-manager": {
         "version": "2.2.2"
     },
+    "opis/json-schema": {
+        "version": "1.0.11"
+    },
     "psr/cache": {
         "version": "1.0.1"
     },
@@ -97,6 +100,9 @@
             "version": "5.2",
             "ref": "fb7e19da7f013d0d422fa9bce16f5c510e27609b"
         }
+    },
+    "squizlabs/php_codesniffer": {
+        "version": "2.2.0"
     },
     "symfony/cache": {
         "version": "v4.1.7"

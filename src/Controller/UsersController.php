@@ -7,11 +7,10 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Exceptions\BadRequestException;
 use App\Helpers\RandomGenerator;
 use App\Repository\UserRepository;
 use Doctrine\Common\Persistence\ObjectManager;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,7 +23,7 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
  * @Route("/api/users")
  * @package App\Controller
  */
-class UsersController extends AbstractController
+class UsersController extends BaseController
 {
 
     /**
@@ -45,10 +44,11 @@ class UsersController extends AbstractController
      * @param UserPasswordEncoderInterface $userPasswordEncoder
      *
      * @return JsonResponse
+     * @throws BadRequestException
      */
     public function create(Request $request, UserPasswordEncoderInterface $userPasswordEncoder): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        $data = $this->validateRequest($request, 'users_create');
 
         $user = new User($data);
         $user->setPublicId(RandomGenerator::generateUniqueInteger(User::LENGTH_UNIQUE));
@@ -71,16 +71,18 @@ class UsersController extends AbstractController
      *
      * @return JsonResponse
      * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws BadRequestException
      */
     public function auth(Request $request, UserPasswordEncoderInterface $userPasswordEncoder): JsonResponse
     {
+
+        $data = $this->validateRequest($request, 'users_auth');
+
         /** @var ObjectManager $entityManager */
         $entityManager = $this->getDoctrine()->getManager();
 
         /** @var UserRepository $userRepository */
         $userRepository = $entityManager->getRepository(User::class);
-
-        $data = json_decode($request->getContent(), true);
 
         $user = $userRepository->loadUserByUsername($data['username']);
 

@@ -18,8 +18,8 @@ RUN apk add --update \
     php7-openssl \
     php7-soap \
     php7-pdo \
-    php7-pgsql \
-    php7-pdo_pgsql \
+    php7-mysqli \
+    php7-pdo_mysql \
     php7-xml \
     php7-sockets \
     php7-zlib \

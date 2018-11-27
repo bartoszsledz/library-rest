@@ -22,8 +22,6 @@ services:
     - ./var/logs/symfony:/var/www/application/var/logs:cached
     links:
     - db
-    extra_hosts:
-    - "docker.host:172.66.0.1"
     networks:
     - bridge
   nginx:

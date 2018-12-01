@@ -22,9 +22,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class User extends DataBaseEntity implements UserInterface, \Serializable
 {
-    const MODEL = 'User';
-    const LENGTH_UNIQUE = 12;
-    const ROLE_USER = 'ROLE_USER';
 
     /**
      * @var array
@@ -347,6 +344,22 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
             $this->session,
             $this->history,
             $this->token) = unserialize($serialized, ['allowed_classes' => false]);
+    }
+
+    /**
+     * @return int
+     */
+    public static function getLengthUnique(): int
+    {
+        return \App\Enums\User::LENGTH_UNIQUE;
+    }
+
+    /**
+     * @return string
+     */
+    public static function getEntityName(): string
+    {
+        return \App\Enums\User::MODEL;
     }
 
 }

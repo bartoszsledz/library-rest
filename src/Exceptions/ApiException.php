@@ -17,16 +17,16 @@ abstract class ApiException extends \Exception
     /** @var int */
     private $statusCode;
 
-    /** @var array */
+    /** @var array|string|null */
     private $errors;
 
     /**
      * BadRequestException constructor.
      *
      * @param int $statusCode
-     * @param array|null $errors
+     * @param array|string|null $errors
      */
-    public function __construct(int $statusCode, array $errors = [])
+    public function __construct(int $statusCode, $errors = null)
     {
         parent::__construct();
 
@@ -51,17 +51,17 @@ abstract class ApiException extends \Exception
     }
 
     /**
-     * @return array
+     * @return array|string|null
      */
-    public function getErrors(): array
+    public function getErrors()
     {
         return $this->errors;
     }
 
     /**
-     * @param array $errors
+     * @param array|string|null $errors
      */
-    public function setErrors(array $errors): void
+    public function setErrors($errors): void
     {
         $this->errors = $errors;
     }

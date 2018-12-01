@@ -24,7 +24,7 @@ class Book extends DataBaseEntity
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", nullable=false, length=13, options={"unsigned"=true})
+     * @ORM\Column(type="bigint", nullable=false, length=13, options={"unsigned"=true})
      */
     private $ean8;
 
@@ -194,4 +194,19 @@ class Book extends DataBaseEntity
         return $this;
     }
 
+    /**
+     * @return int
+     */
+    public static function getLengthUnique(): int
+    {
+       return \App\Enums\Book::LENGTH_UNIQUE;
+    }
+
+    /**
+     * @return string
+     */
+    public static function getEntityName(): string
+    {
+        return \App\Enums\Book::MODEL;
+    }
 }

@@ -2,40 +2,40 @@ version: '2'
 
 services:
   db:
-    image: mysql:5.7
+    image: mysql
+    command: ["--default-authentication-plugin=mysql_native_password"]
+    ports:
+      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    expose:
-    - "3306"
-    restart: always
     networks:
-    - bridge
+      - bridge
   php:
     build: ./.docker/php-fpm
     ports:
-    - "9001:9000"
+      - "9000:9000"
     volumes:
-    - ./:/var/www/application:cached
-    - ./var/logs/symfony:/var/www/application/var/logs:cached
+      - ./:/var/www/application:cached
+      - ./var/logs/symfony:/var/www/application/var/logs:cached
     links:
-    - db
+      - db
     networks:
-    - bridge
+      - bridge
   nginx:
     build: ./.docker/nginx
     ports:
-    - "80:80"
+      - "80:80"
     links:
-    - php
+      - php
     volumes_from:
-    - php
+      - php
     volumes:
-    - ./var/logs/nginx/:/var/log/nginx:cached
+      - ./var/logs/nginx/:/var/log/nginx:cached
     networks:
-    - bridge
+      - bridge
 
 networks:
   bridge:
@@ -43,5 +43,5 @@ networks:
     ipam:
       driver: default
       config:
-      - subnet: "172.66.0.1/16"
-        gateway: "172.66.0.1"
+        - subnet: "172.24.0.1/16"
+          gateway: "172.24.0.1"

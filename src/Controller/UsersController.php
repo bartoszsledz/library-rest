@@ -7,6 +7,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Enums\User as UserEnum;
 use App\Exceptions\BadRequestException;
 use App\Helpers\RandomGenerator;
 use App\Repository\UserRepository;
@@ -20,25 +21,13 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 /**
  * Class UsersController
  *
- * @Route("/api/users")
  * @package App\Controller
  */
 class UsersController extends BaseController
 {
 
     /**
-     * @Route("/hello", methods={"GET"}, name="users_index")
-     *
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function index(Request $request): JsonResponse
-    {
-        return new JsonResponse(['test' => 'test1'], 200, []);
-    }
-
-    /**
-     * @Route("/create", methods={"POST"}, name="users_create")
+     * @Route("/api/users", methods={"POST"}, name="users_create")
      *
      * @param Request $request
      * @param UserPasswordEncoderInterface $userPasswordEncoder
@@ -48,23 +37,23 @@ class UsersController extends BaseController
      */
     public function create(Request $request, UserPasswordEncoderInterface $userPasswordEncoder): JsonResponse
     {
-        $data = $this->validateRequest($request, 'users_create');
+        $data = $this->validateRequest($request, 'user_create');
 
         $user = new User($data);
-        $user->setPublicId(RandomGenerator::generateUniqueInteger(User::LENGTH_UNIQUE));
+        $user->setPublicId(RandomGenerator::generateUniqueInteger(User::getLengthUnique()));
         $user->setToken(RandomGenerator::generateAuthToken());
-        $user->setRoles([User::ROLE_USER]);
+        $user->setRoles([UserEnum::ROLE_USER]);
         $user->setPassword($userPasswordEncoder->encodePassword($user, $user->getPassword()));
 
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($user);
         $entityManager->flush();
 
-        return new JsonResponse([], Response::HTTP_CREATED, []);
+        return new JsonResponse(json_encode(['status' => 'Created']), Response::HTTP_CREATED, [], true);
     }
 
     /**
-     * @Route("/auth", methods={"POST"}, name="users_auth")
+     * @Route("/api/users/auth", methods={"POST"}, name="users_auth")
      *
      * @param Request $request
      * @param UserPasswordEncoderInterface $userPasswordEncoder
@@ -75,8 +64,7 @@ class UsersController extends BaseController
      */
     public function auth(Request $request, UserPasswordEncoderInterface $userPasswordEncoder): JsonResponse
     {
-
-        $data = $this->validateRequest($request, 'users_auth');
+        $data = $this->validateRequest($request, 'user_auth');
 
         /** @var ObjectManager $entityManager */
         $entityManager = $this->getDoctrine()->getManager();
@@ -87,10 +75,10 @@ class UsersController extends BaseController
         $user = $userRepository->loadUserByUsername($data['username']);
 
         if ($user !== null && $userPasswordEncoder->isPasswordValid($user, $data['password'])) {
-            return new JsonResponse(['token' => $user->getToken()], Response::HTTP_OK, []);
+            return new JsonResponse(json_encode(['token' => $user->getToken()]), Response::HTTP_OK, [], true);
         }
 
-        return new JsonResponse(['details' => 'Bad login or password.'], Response::HTTP_BAD_REQUEST);
+        throw new BadRequestException('Bad login or password.');
     }
 
 }

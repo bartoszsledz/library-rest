@@ -27,9 +27,9 @@ abstract class BaseController extends AbstractController
      *
      * @throws BadRequestException
      *
-     * @return mixed
+     * @return array
      */
-    protected function validateRequest(Request $request, string $schema)
+    protected function validateRequest(Request $request, string $schema): array
     {
         $data = json_decode($request->getContent());
         $schema = Schema::fromJsonString(file_get_contents(__DIR__ . '/../Resources/Schemas/' . $schema . '.json'));
@@ -40,10 +40,10 @@ abstract class BaseController extends AbstractController
         $result = $validator->schemaValidation($data, $schema, -1);
 
         if ($result->isValid()) {
-            return $data;
+            return (array)$data;
         }
 
-        throw new BadRequestException(Response::HTTP_BAD_REQUEST, $result->getErrors());
+        throw new BadRequestException($result->getErrors());
     }
 
 }

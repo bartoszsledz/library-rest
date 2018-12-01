@@ -52,8 +52,8 @@ class UserRepository extends ServiceEntityRepository implements UserProviderInte
      */
     public function loadUserByUsername($username)
     {
-        return $this->createQueryBuilder('u')
-            ->andWhere('u.username = :username')
+        return $this->createQueryBuilder('user')
+            ->andWhere('user.username = :username')
             ->setParameter('username', $username)
             ->getQuery()
             ->getOneOrNullResult();

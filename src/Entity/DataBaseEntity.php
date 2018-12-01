@@ -6,6 +6,7 @@
 
 namespace App\Entity;
 
+use App\Helpers\RandomGenerator;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\MappedSuperclass;
@@ -19,9 +20,6 @@ use Doctrine\ORM\Mapping\MappedSuperclass;
  */
 abstract class DataBaseEntity
 {
-
-    const MODEL = null;
-    const LENGTH_UNIQUE = null;
 
     protected $virtualFields = [];
 
@@ -69,6 +67,10 @@ abstract class DataBaseEntity
     {
         if ($data) {
             $this->setData($data);
+        }
+
+        if ($this->getPublicId() === null) {
+            $this->setPublicId(RandomGenerator::generateUniqueInteger(static::getLengthUnique()));
         }
     }
 
@@ -182,7 +184,7 @@ abstract class DataBaseEntity
      *
      * @return void
      */
-    private function setData(array $data = []): void
+    public function setData(array $data = []): void
     {
         //todo dorobić obsługę dla encji powiązanych z wykorzystaniem const MODEL
         foreach ($data as $key => $value) {
@@ -194,5 +196,16 @@ abstract class DataBaseEntity
 
         $this->data = $data;
     }
+
+    /**
+     * @return int
+     */
+    public abstract static function getLengthUnique(): int;
+
+
+    /**
+     * @return string
+     */
+    public abstract static function getEntityName(): string;
 
 }

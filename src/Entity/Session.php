@@ -113,4 +113,19 @@ class Session extends DataBaseEntity
         return $this;
     }
 
+    /**
+     * @return int
+     */
+    public static function getLengthUnique(): int
+    {
+        // TODO: Implement getLengthUnique() method.
+    }
+
+    /**
+     * @return string
+     */
+    public static function getEntityName(): string
+    {
+        // TODO: Implement getEntityName() method.
+    }
 }

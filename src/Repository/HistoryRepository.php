@@ -6,6 +6,9 @@
 
 namespace App\Repository;
 
+use App\Entity\History;
+use App\Exceptions\NotFoundException;
+
 /**
  * Class HistoryRepository
  *
@@ -13,5 +16,39 @@ namespace App\Repository;
  */
 class HistoryRepository extends EntityRepository
 {
+
+    /**
+     * @param int $publicId
+     *
+     * @return History
+     * @throws \App\Exceptions\NotFoundException
+     */
+    public function getByPublicId(int $publicId): History
+    {
+        $entity = $this->findOneBy(['public_id' => $publicId]);
+
+        if ($entity instanceof History) {
+            return $entity;
+        }
+
+        throw new NotFoundException();
+    }
+
+    /**
+     * @param int $id
+     *
+     * @return History
+     * @throws NotFoundException
+     */
+    public function getById(int $id)
+    {
+        $entity = $this->findOneBy(['id' => $id]);
+
+        if ($entity && $entity instanceof History) {
+            return $entity;
+        }
+
+        throw new NotFoundException();
+    }
 
 }

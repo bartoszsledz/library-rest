@@ -6,6 +6,9 @@
 
 namespace App\Repository;
 
+use App\Entity\Session;
+use App\Exceptions\NotFoundException;
+
 /**
  * Class SessionRepository
  *
@@ -13,5 +16,38 @@ namespace App\Repository;
  */
 class SessionRepository extends EntityRepository
 {
+    /**
+     * @param int $publicId
+     *
+     * @return Session
+     * @throws \App\Exceptions\NotFoundException
+     */
+    public function getByPublicId(int $publicId): Session
+    {
+        $entity = $this->findOneBy(['public_id' => $publicId]);
+
+        if ($entity instanceof Session) {
+            return $entity;
+        }
+
+        throw new NotFoundException();
+    }
+
+    /**
+     * @param int $id
+     *
+     * @return Session
+     * @throws NotFoundException
+     */
+    public function getById(int $id)
+    {
+        $entity = $this->findOneBy(['id' => $id]);
+
+        if ($entity && $entity instanceof Session) {
+            return $entity;
+        }
+
+        throw new NotFoundException();
+    }
 
 }

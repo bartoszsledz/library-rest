@@ -62,13 +62,6 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
     /**
      * @var PersistentCollection
      *
-     * @ORM\OneToMany(targetEntity="App\Entity\Session", mappedBy="user")
-     */
-    private $session;
-
-    /**
-     * @var PersistentCollection
-     *
      * @ORM\OneToMany(targetEntity="App\Entity\History", mappedBy="user")
      */
     private $history;
@@ -88,29 +81,8 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
     public function __construct(array $data = [])
     {
         parent::__construct($data);
-        $this->session = new ArrayCollection();
         $this->history = new ArrayCollection();
         $this->borrow = new ArrayCollection();
-    }
-
-    /**
-     * @return PersistentCollection|null
-     */
-    public function getSession(): ?PersistentCollection
-    {
-        return $this->session;
-    }
-
-    /**
-     * @param Session $session
-     *
-     * @return User
-     */
-    public function setSession(Session $session): self
-    {
-        $this->session[] = $session;
-
-        return $this;
     }
 
     /**
@@ -128,7 +100,7 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
      */
     public function setHistory(PersistentCollection $history): self
     {
-        $this->history = $history;
+        $this->history[] = $history;
 
         return $this;
     }
@@ -180,7 +152,7 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
      */
     public function setBorrow(PersistentCollection $borrow): self
     {
-        $this->borrow = $borrow;
+        $this->borrow[] = $borrow;
 
         return $this;
     }
@@ -315,7 +287,6 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
                 $this->password,
                 $this->created,
                 $this->modified,
-                $this->session,
                 $this->history,
                 $this->token
             ]
@@ -341,7 +312,6 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
             $this->password,
             $this->created,
             $this->modified,
-            $this->session,
             $this->history,
             $this->token) = unserialize($serialized, ['allowed_classes' => false]);
     }

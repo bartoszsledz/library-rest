@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Swagger\Annotations as SWG;
 
 /**
  * Class UsersController
@@ -31,6 +32,30 @@ class UsersController extends BaseController
      *
      * @param Request $request
      * @param UserPasswordEncoderInterface $userPasswordEncoder
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="New user was created."
+     * )
+     * @SWG\Response(
+     *     response=400,
+     *     description="Bad request."
+     * )
+     * @SWG\Post(
+     *     @SWG\Parameter(
+     *         name="Request Body",
+     *         in="body",
+     *         description="JSON Payload",
+     *         required=true,
+     *         format="application/json",
+     *         @SWG\Schema(
+     *             type="object",
+     *             @SWG\Property(property="username", type="string", example="user123"),
+     *             @SWG\Property(property="email", type="string", example="user123@gmail.com"),
+     *             @SWG\Property(property="password", type="string", example="*************")
+     *         )
+     *     )
+     * )
      *
      * @return JsonResponse
      * @throws BadRequestException
@@ -75,6 +100,13 @@ class UsersController extends BaseController
         $user = $userRepository->loadUserByUsername($data['username']);
 
         if ($user !== null && $userPasswordEncoder->isPasswordValid($user, $data['password'])) {
+            $user->setToken(RandomGenerator::generateAuthToken());
+
+            $this->get('session')->set($user->getToken(), $user);
+
+            $entityManager->persist($user);
+            $entityManager->flush();
+
             return new JsonResponse(json_encode(['token' => $user->getToken()]), Response::HTTP_OK, [], true);
         }
 

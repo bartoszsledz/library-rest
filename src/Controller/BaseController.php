@@ -11,7 +11,7 @@ namespace App\Controller;
 use App\Exceptions\BadRequestException;
 use Opis\JsonSchema\{Validator, ValidationResult, Schema};
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\{Request, Response};
+use Symfony\Component\HttpFoundation\{Request};
 
 /**
  * Class BaseController
@@ -44,6 +44,16 @@ abstract class BaseController extends AbstractController
         }
 
         throw new BadRequestException($result->getErrors());
+    }
+
+    /**
+     * @param string $token
+     *
+     * @return mixed
+     */
+    public function getLoggedUser(string $token)
+    {
+        return $this->get('session')->get($token);
     }
 
 }

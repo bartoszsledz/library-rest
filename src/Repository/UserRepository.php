@@ -7,6 +7,7 @@
 namespace App\Repository;
 
 use App\Entity\User;
+use App\Exceptions\UnauthorizedException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
@@ -100,5 +101,22 @@ class UserRepository extends ServiceEntityRepository implements UserProviderInte
     public function supportsClass($class)
     {
         return $this->getEntityName() === $class || is_subclass_of($class, $this->getEntityName());
+    }
+
+    /**
+     * @param string $token
+     *
+     * @return User|null
+     * @throws UnauthorizedException
+     */
+    public function getLoggedUser($token)
+    {
+        $entity = $this->findOneBy(['token' => $token]);
+
+        if ($entity instanceof User) {
+            return $entity;
+        }
+
+        throw new UnauthorizedException();
     }
 }

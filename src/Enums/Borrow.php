@@ -1,18 +1,18 @@
 <?php
 /**
  * @author: Bartosz Sledz <bartosz.sledz94@gmail.com>
- * @date: 01.12.18 21:10
+ * @date: 02.12.18 17:00
  */
 
 namespace App\Enums;
 
 /**
- * Class Book
+ * Class Borrow
  *
  * @package App\Enums
  */
-class Book
+class Borrow
 {
-    const MODEL = 'Book';
-    const LENGTH_UNIQUE = 10;
+    const MODEL = 'Borrow';
+    const LENGTH_UNIQUE = 11;
 }

@@ -4,14 +4,16 @@
  * @date: 27.11.18 21:39
  */
 
-namespace App\Exceptions;
+namespace App\Event;
 
+use App\Exceptions\{ApiException, BadRequestException, NotFoundException, UnauthorizedException};
 use Doctrine\DBAL\DBALException;
 use Opis\JsonSchema\ValidationError;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
@@ -19,7 +21,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
  *
  * @package App\Exceptions
  */
-final class ApiExceptionSubscriber implements EventSubscriberInterface
+class ExceptionSubscriber implements EventSubscriberInterface
 {
 
     /**
@@ -33,7 +35,11 @@ final class ApiExceptionSubscriber implements EventSubscriberInterface
             case $e instanceof BadRequestException:
                 $event->setResponse($this->handleBadRequestException($e));
                 break;
+            case $e instanceof UnauthorizedException:
+                $event->setResponse($this->handleUnauthorizedException($e));
+                break;
             case $e instanceof NotFoundException:
+            case $e instanceof NotFoundHttpException:
                 $event->setResponse($this->handleNotFoundException($e));
                 break;
             case $e instanceof ApiException:
@@ -48,7 +54,22 @@ final class ApiExceptionSubscriber implements EventSubscriberInterface
     }
 
     /**
-     * @return array
+     * Returns an array of event names this subscriber wants to listen to.
+     *
+     * The array keys are event names and the value can be:
+     *
+     *  * The method name to call (priority defaults to 0)
+     *  * An array composed of the method name to call and the priority
+     *  * An array of arrays composed of the method names to call and respective
+     *    priorities, or 0 if unset
+     *
+     * For instance:
+     *
+     *  * array('eventName' => 'methodName')
+     *  * array('eventName' => array('methodName', $priority))
+     *  * array('eventName' => array(array('methodName1', $priority), array('methodName2')))
+     *
+     * @return array The event names to listen to
      */
     public static function getSubscribedEvents()
     {
@@ -129,7 +150,7 @@ final class ApiExceptionSubscriber implements EventSubscriberInterface
     {
         return new JsonResponse(
             json_encode(['errors' => $e->getPrevious() ? $e->getPrevious()->getMessage() : $e->getMessage()]),
-            Response::HTTP_CONFLICT,
+            Response::HTTP_BAD_REQUEST,
             ['Content-Type' => 'application/problem+json'],
             true
         );
@@ -144,6 +165,21 @@ final class ApiExceptionSubscriber implements EventSubscriberInterface
         return new JsonResponse(
             json_encode(['errors' => 'Error Occurred']),
             Response::HTTP_BAD_REQUEST,
+            ['Content-Type' => 'application/problem+json'],
+            true
+        );
+    }
+
+    /**
+     * @param UnauthorizedException $e
+     *
+     * @return JsonResponse
+     */
+    private function handleUnauthorizedException($e)
+    {
+        return new JsonResponse(
+            json_encode(['errors' => Response::$statusTexts[Response::HTTP_UNAUTHORIZED]]),
+            Response::HTTP_UNAUTHORIZED,
             ['Content-Type' => 'application/problem+json'],
             true
         );

@@ -11,7 +11,7 @@ namespace App\Helpers;
  *
  * @package App\Helpers
  */
-final class RandomGenerator
+class RandomGenerator
 {
 
     /**

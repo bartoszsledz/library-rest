@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://api/borrow_POST",
+  "type": "object",
+  "properties": {
+    "bookId": {
+      "type": "integer",
+      "minLength": 11,
+      "maxLength": 11
+    }
+  },
+  "required": [
+    "bookId"
+  ],
+  "additionalProperties": false
+}

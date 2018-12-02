@@ -14,6 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @ORM\Table(name="borrow")
  * @ORM\Entity(repositoryClass="App\Repository\BorrowRepository")
+ * @ORM\HasLifecycleCallbacks()
  *
  * @package App\Entity
  */
@@ -31,7 +32,7 @@ class Borrow extends DataBaseEntity
     /**
      * @var Book
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="book")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Book", inversedBy="book")
      * @ORM\JoinColumn(nullable=false)
      */
     private $book;
@@ -102,13 +103,14 @@ class Borrow extends DataBaseEntity
     }
 
     /**
-     * @param DateTime $dateBorrow
+     * @ORM\PrePersist()
      *
      * @return Borrow
+     * @throws \Exception
      */
-    public function setDateBorrow(DateTime $dateBorrow): self
+    public function setDateBorrow(): self
     {
-        $this->dateBorrow = $dateBorrow;
+        $this->dateBorrow = new DateTime();
 
         return $this;
     }
@@ -118,7 +120,7 @@ class Borrow extends DataBaseEntity
      */
     public static function getLengthUnique(): int
     {
-        // TODO: Implement getLengthUnique() method.
+        return \App\Enums\Borrow::LENGTH_UNIQUE;
     }
 
     /**
@@ -126,6 +128,6 @@ class Borrow extends DataBaseEntity
      */
     public static function getEntityName(): string
     {
-        // TODO: Implement getEntityName() method.
+        return \App\Enums\Borrow::MODEL;
     }
 }

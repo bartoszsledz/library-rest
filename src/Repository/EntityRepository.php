@@ -23,15 +23,14 @@ abstract class EntityRepository extends \Doctrine\ORM\EntityRepository
      * @return DataBaseEntity
      * @throws NotFoundException
      */
-    public function getByPublicId(int $publicId): DataBaseEntity
-    {
-        $entity = $this->findOneBy(['public_id' => $publicId]);
+    public abstract function getByPublicId(int $publicId);
 
-        if ($entity && $entity instanceof DataBaseEntity) {
-            return $entity;
-        }
-
-        throw new NotFoundException();
-    }
+    /**
+     * @param int $id
+     *
+     * @return DataBaseEntity
+     * @throws NotFoundException
+     */
+    public abstract function getById(int $id);
 
 }

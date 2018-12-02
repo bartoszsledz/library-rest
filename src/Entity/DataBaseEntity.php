@@ -79,10 +79,10 @@ abstract class DataBaseEntity
      */
     public function setCreatedField()
     {
-        $this->setCreated(new \DateTime());
+        $this->setCreated();
 
         if ($this->getModified() === null) {
-            $this->setModified(new \DateTime());
+            $this->setModified();
         }
     }
 

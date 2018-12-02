@@ -9,6 +9,7 @@ namespace App\Controller;
 use App\Entity\Book;
 use App\Exceptions\BadRequestException;
 use App\Exceptions\NotFoundException;
+use App\Annotation\CheckRequest;
 use App\Repository\BookRepository;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -26,6 +27,7 @@ class BookController extends BaseController
 
     /**
      * @Route("/api/books", methods={"POST"}, name="book_add")
+     * @CheckRequest
      *
      * @param Request $request
      *
@@ -48,6 +50,7 @@ class BookController extends BaseController
 
     /**
      * @Route("/api/books/{id}", methods={"DELETE"}, requirements={"id"="\d+"}, name="book_delete")
+     * @CheckRequest
      *
      * @param Request $request
      *
@@ -67,7 +70,7 @@ class BookController extends BaseController
         $book = $bookRepository->getByPublicId($bookPublicId);
 
         if ($book === null) {
-            throw new NotFoundException(Response::HTTP_NOT_FOUND);
+            throw new NotFoundException();
         }
 
         $entityManager->remove($book);
@@ -78,6 +81,7 @@ class BookController extends BaseController
 
     /**
      * @Route("/api/books/{id}", methods={"PUT"}, requirements={"id"="\d+"}, name="book_edit")
+     * @CheckRequest
      *
      * @param Request $request
      *
@@ -100,7 +104,7 @@ class BookController extends BaseController
         $book = $bookRepository->getByPublicId($bookPublicId);
 
         if ($book === null) {
-            throw new NotFoundException(Response::HTTP_NOT_FOUND);
+            throw new NotFoundException();
         }
 
         $book->setData($data);

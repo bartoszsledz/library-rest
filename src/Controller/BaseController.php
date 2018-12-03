@@ -46,14 +46,4 @@ abstract class BaseController extends AbstractController
         throw new BadRequestException($result->getErrors());
     }
 
-    /**
-     * @param string $token
-     *
-     * @return mixed
-     */
-    public function getLoggedUser(string $token)
-    {
-        return $this->get('session')->get($token);
-    }
-
 }

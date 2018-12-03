@@ -24,8 +24,8 @@ class Borrow extends DataBaseEntity
     /**
      * @var User
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="borrow")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="borrows")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", nullable=false)
      */
     private $user;
 
@@ -33,7 +33,7 @@ class Borrow extends DataBaseEntity
      * @var Book
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Book", inversedBy="book")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(name="book_id", referencedColumnName="id", nullable=false)
      */
     private $book;
 

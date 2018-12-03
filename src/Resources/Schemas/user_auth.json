@@ -3,7 +3,7 @@
   "$id": "http://api/users/auth",
   "type": "object",
   "properties": {
-    "username": {
+    "email": {
       "type": "string",
       "minLength": 5,
       "maxLength": 64
@@ -15,7 +15,7 @@
     }
   },
   "required": [
-    "username",
+    "email",
     "password"
   ],
   "additionalProperties": false

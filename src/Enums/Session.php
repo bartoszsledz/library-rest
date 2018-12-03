@@ -15,4 +15,7 @@ class Session
 {
     const MODEL = 'Session';
     const LENGTH_UNIQUE = 11;
+    const STATUS_ACTIVE = 1;
+    const STATUS__EXPIRES = 2;
+    const SESSION_LIFE_TIME = '+15 minutes';
 }

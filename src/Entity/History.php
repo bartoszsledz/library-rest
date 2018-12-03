@@ -23,16 +23,16 @@ class History extends DataBaseEntity
     /**
      * @var User
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="history")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="histories")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", nullable=false)
      */
     private $user;
 
     /**
      * @var Book
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Book", inversedBy="history")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\ManyToOne(targetEntity="App\Entity\Book", inversedBy="histories")
+     * @ORM\JoinColumn(name="book_id", referencedColumnName="id", nullable=false)
      */
     private $book;
 

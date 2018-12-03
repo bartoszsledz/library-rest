@@ -8,6 +8,7 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\OrderBy;
 use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -34,13 +35,6 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
      * @var string
      *
      * @ORM\Column(type="string", length=64, unique=true)
-     */
-    private $username;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=64, unique=true)
      * @Assert\Email()
      */
     private $email;
@@ -53,25 +47,25 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
     private $password;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=255, unique=true)
-     */
-    private $token;
-
-    /**
      * @var PersistentCollection
      *
      * @ORM\OneToMany(targetEntity="App\Entity\History", mappedBy="user")
      */
-    private $history;
+    private $histories;
 
     /**
      * @var PersistentCollection
      *
      * @ORM\OneToMany(targetEntity="App\Entity\Borrow", mappedBy="user")
      */
-    private $borrow;
+    private $borrows;
+
+    /**
+     * @var PersistentCollection
+     *
+     * @ORM\OneToMany(targetEntity="App\Entity\Session", mappedBy="user")
+     */
+    private $sessions;
 
     /**
      * User constructor.
@@ -81,26 +75,31 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
     public function __construct(array $data = [])
     {
         parent::__construct($data);
-        $this->history = new ArrayCollection();
-        $this->borrow = new ArrayCollection();
+        $this->histories = new ArrayCollection();
+        $this->sessions = new ArrayCollection();
+        $this->borrows = new ArrayCollection();
     }
 
     /**
      * @return PersistentCollection
      */
-    public function getHistory(): ?PersistentCollection
+    public function getHistories(): ?PersistentCollection
     {
-        return $this->history;
+        return $this->histories;
     }
 
     /**
-     * @param PersistentCollection $history
+     * @param History $history
      *
      * @return User
      */
-    public function setHistory(PersistentCollection $history): self
+    public function setHistories(History $history): self
     {
-        $this->history[] = $history;
+        if (!$this->histories->contains($history))
+        {
+            $this->histories[] = $history;
+            $history->setUser($this);
+        }
 
         return $this;
     }
@@ -140,19 +139,23 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
     /**
      * @return PersistentCollection
      */
-    public function getBorrow(): ?PersistentCollection
+    public function getBorrows(): ?PersistentCollection
     {
-        return $this->borrow;
+        return $this->borrows;
     }
 
     /**
-     * @param PersistentCollection $borrow
+     * @param Borrow $borrow
      *
      * @return User
      */
-    public function setBorrow(PersistentCollection $borrow): self
+    public function setBorrow(Borrow $borrow): self
     {
-        $this->borrow[] = $borrow;
+        if (!$this->borrows->contains($borrow))
+        {
+            $this->borrows[] = $borrow;
+            $borrow->setUser($this);
+        }
 
         return $this;
     }
@@ -178,21 +181,25 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
     }
 
     /**
-     * @return string
+     * @return PersistentCollection
      */
-    public function getToken(): string
+    public function getSessions(): PersistentCollection
     {
-        return $this->token;
+        return $this->sessions;
     }
 
     /**
-     * @param string $token
+     * @param Session $session
      *
      * @return User
      */
-    public function setToken(string $token): self
+    public function setSession(Session $session): self
     {
-        $this->token = $token;
+        if (!$this->sessions->contains($session))
+        {
+            $this->sessions[] = $session;
+            $session->setUser($this);
+        }
 
         return $this;
     }
@@ -243,20 +250,7 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
      */
     public function getUsername(): ?string
     {
-        return $this->username;
-    }
-
-    /**
-     * Set the username used to authenticate the user.
-     *
-     * @param string $username
-     * @return User The username
-     */
-    public function setUsername(string $username): self
-    {
-        $this->username = $username;
-
-        return $this;
+        return $this->email;
     }
 
     /**
@@ -280,15 +274,13 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
     {
         return serialize([
                 $this->id,
-                $this->username,
                 $this->public_id,
                 $this->email,
                 $this->roles,
                 $this->password,
                 $this->created,
                 $this->modified,
-                $this->history,
-                $this->token
+                $this->histories
             ]
         );
     }
@@ -305,15 +297,14 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
     public function unserialize($serialized)
     {
         list($this->id,
-            $this->username,
             $this->public_id,
             $this->email,
             $this->roles,
             $this->password,
             $this->created,
             $this->modified,
-            $this->history,
-            $this->token) = unserialize($serialized, ['allowed_classes' => false]);
+            $this->histories
+            ) = unserialize($serialized, ['allowed_classes' => false]);
     }
 
     /**

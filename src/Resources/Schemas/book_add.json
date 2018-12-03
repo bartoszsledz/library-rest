@@ -3,7 +3,7 @@
   "$id": "http://api/books_POST",
   "type": "object",
   "properties": {
-    "ean8": {
+    "isbn": {
       "type": "integer",
       "minLength": 8,
       "maxLength": 13
@@ -25,7 +25,7 @@
     }
   },
   "required": [
-    "ean8",
+    "isbn",
     "title",
     "author",
     "description"

@@ -26,7 +26,7 @@ class Book extends DataBaseEntity
      *
      * @ORM\Column(type="bigint", nullable=false, length=13, options={"unsigned"=true})
      */
-    private $ean8;
+    private $isbn;
 
     /**
      * @var string
@@ -38,7 +38,7 @@ class Book extends DataBaseEntity
     /**
      * @var string
      *
-     * @ORM\Column(type="string", length=64, unique=true)
+     * @ORM\Column(type="string", length=64)
      */
     private $author;
 
@@ -61,7 +61,7 @@ class Book extends DataBaseEntity
      *
      * @ORM\OneToMany(targetEntity="App\Entity\History", mappedBy="book")
      */
-    private $history;
+    private $histories;
 
     /**
      * Book constructor.
@@ -71,25 +71,25 @@ class Book extends DataBaseEntity
     public function __construct(array $data = [])
     {
         parent::__construct($data);
-        $this->history = new ArrayCollection();
+        $this->histories = new ArrayCollection();
     }
 
     /**
      * @return int
      */
-    public function getEan8(): ?int
+    public function getISBN(): ?int
     {
-        return $this->ean8;
+        return $this->isbn;
     }
 
     /**
-     * @param int $ean8
+     * @param int $isbn
      *
      * @return Book
      */
-    public function setEan8(int $ean8): self
+    public function setISBN(int $isbn): self
     {
-        $this->ean8 = $ean8;
+        $this->isbn = $isbn;
 
         return $this;
     }
@@ -97,19 +97,19 @@ class Book extends DataBaseEntity
     /**
      * @return PersistentCollection
      */
-    public function getHistory(): ?PersistentCollection
+    public function getHistories(): ?PersistentCollection
     {
-        return $this->history;
+        return $this->histories;
     }
 
     /**
-     * @param PersistentCollection $history
+     * @param History $histories
      *
      * @return Book
      */
-    public function setHistory(PersistentCollection $history): self
+    public function setHistories(History $histories): self
     {
-        $this->history = $history;
+        $this->histories[] = $histories;
 
         return $this;
     }

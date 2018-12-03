@@ -85,7 +85,7 @@ class BorrowController extends BaseController
         $book->setAvailable(false);
 
         $borrow = new Borrow();
-        $borrow->setUser($this->getLoggedUser($request->headers->get('Authorization')));
+        $borrow->setUser($this->getUser());
         $borrow->setBook($book);
 
         $entityManager->merge($borrow);

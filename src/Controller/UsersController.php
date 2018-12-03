@@ -6,12 +6,15 @@
 
 namespace App\Controller;
 
+use App\Entity\Session;
 use App\Entity\User;
 use App\Enums\User as UserEnum;
 use App\Exceptions\BadRequestException;
 use App\Helpers\RandomGenerator;
 use App\Repository\UserRepository;
+use App\Services\UserService;
 use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -50,7 +53,6 @@ class UsersController extends BaseController
      *         format="application/json",
      *         @SWG\Schema(
      *             type="object",
-     *             @SWG\Property(property="username", type="string", example="user123"),
      *             @SWG\Property(property="email", type="string", example="user123@gmail.com"),
      *             @SWG\Property(property="password", type="string", example="*************")
      *         )
@@ -64,9 +66,17 @@ class UsersController extends BaseController
     {
         $data = $this->validateRequest($request, 'user_create');
 
+        $entityManager = $this->getDoctrine()->getManager();
+
+        /** @var UserRepository $userRepository */
+        $userRepository = $entityManager->getRepository(User::class);
+
+        if ($userRepository->findOneBy(['email' => $data['email']])) {
+            throw new BadRequestException('Entered e-mail address is already in use.');
+        }
+
         $user = new User($data);
         $user->setPublicId(RandomGenerator::generateUniqueInteger(User::getLengthUnique()));
-        $user->setToken(RandomGenerator::generateAuthToken());
         $user->setRoles([UserEnum::ROLE_USER]);
         $user->setPassword($userPasswordEncoder->encodePassword($user, $user->getPassword()));
 
@@ -84,10 +94,10 @@ class UsersController extends BaseController
      * @param UserPasswordEncoderInterface $userPasswordEncoder
      *
      * @return JsonResponse
-     * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws BadRequestException
+     * @throws \Exception
      */
-    public function auth(Request $request, UserPasswordEncoderInterface $userPasswordEncoder): JsonResponse
+    public function login(Request $request, UserPasswordEncoderInterface $userPasswordEncoder): JsonResponse
     {
         $data = $this->validateRequest($request, 'user_auth');
 
@@ -97,17 +107,20 @@ class UsersController extends BaseController
         /** @var UserRepository $userRepository */
         $userRepository = $entityManager->getRepository(User::class);
 
-        $user = $userRepository->loadUserByUsername($data['username']);
+        $user = $userRepository->loadUserByUsername($data['email']);
 
         if ($user !== null && $userPasswordEncoder->isPasswordValid($user, $data['password'])) {
-            $user->setToken(RandomGenerator::generateAuthToken());
+            $session = new Session();
+            $session->setToken(RandomGenerator::generateAuthToken());
+            $session->setExpires(new \DateTime(\App\Enums\Session::SESSION_LIFE_TIME));
+            $session->setIp($request->getClientIp() ?? '');
+            $session->setStatus(\App\Enums\Session::STATUS_ACTIVE);
+            $session->setUser($user);
 
-            $this->get('session')->set($user->getToken(), $user);
-
-            $entityManager->persist($user);
+            $entityManager->merge($session);
             $entityManager->flush();
 
-            return new JsonResponse(json_encode(['token' => $user->getToken()]), Response::HTTP_OK, [], true);
+            return new JsonResponse(json_encode(['token' => $session->getToken()]), Response::HTTP_OK, [], true);
         }
 
         throw new BadRequestException('Bad login or password.');

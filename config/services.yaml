@@ -31,31 +31,17 @@ services:
   jms_serializer.naming_strategy:
     alias: jms_serializer.identical_property_naming_strategy
 
-  # apikey access for microservices
-  service_provider:
-    class: App\Security\ServiceProvider
-    arguments: [ "@doctrine.orm.entity_manager" , "@service_container" ]
-    public: true
-  service_authenticator:
-    class: App\Security\ServiceAuthenticator
-
-  sensio_framework_extra.view.listener:
-    alias: Sensio\Bundle\FrameworkExtraBundle\EventListener\TemplateListener
-
-  # Data fixtures
-  #DataFixtures\:
-  #    resource: '../src/DataFixtures'
-  #    tags: ['doctrine.fixture.orm']
-
   exception_subscriber:
     class: App\Event\ExceptionSubscriber
     arguments: []
     tags:
       - { name: kernel.event_subscriber, event: kernel.exception, method: onApiException }
 
-  controller_subscriber:
-    class: App\Event\ControllerSubscriber
-    arguments:
-      - "@annotation_reader"
-    tags:
-      - { name: kernel.event_subscriber, event: kernel.controller, method: onKernelController }
+  # user session token access
+  session_provider:
+    class: App\Security\SessionProvider
+    arguments: [ "@doctrine.orm.entity_manager" , "@service_container" ]
+    public: true
+  user_authenticator:
+    class: App\Security\UserAuthenticator
+    public: true

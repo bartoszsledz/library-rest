@@ -54,8 +54,8 @@ class UserRepository extends ServiceEntityRepository implements UserProviderInte
     public function loadUserByUsername($username)
     {
         return $this->createQueryBuilder('user')
-            ->andWhere('user.username = :username')
-            ->setParameter('username', $username)
+            ->andWhere('user.email = :email')
+            ->setParameter('email', $username)
             ->getQuery()
             ->getOneOrNullResult();
     }
@@ -103,20 +103,4 @@ class UserRepository extends ServiceEntityRepository implements UserProviderInte
         return $this->getEntityName() === $class || is_subclass_of($class, $this->getEntityName());
     }
 
-    /**
-     * @param string $token
-     *
-     * @return User|null
-     * @throws UnauthorizedException
-     */
-    public function getLoggedUser($token)
-    {
-        $entity = $this->findOneBy(['token' => $token]);
-
-        if ($entity instanceof User) {
-            return $entity;
-        }
-
-        throw new UnauthorizedException();
-    }
 }

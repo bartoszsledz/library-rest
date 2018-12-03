@@ -7,21 +7,22 @@ security:
     in_memory:
       memory: ~
 
-    service_provider:
-      id: service_provider
+    session_provider:
+      id: session_provider
 
   firewalls:
     public:
-      pattern: ^/hello$
+      pattern: ^(/api/users)|(/api/users/auth)$
+      methods: [POST]
       security: false
 
-   # api_key:
-      # api key access for other microservices
-    #  pattern: ~
-     # stateless: true
-     # simple_preauth:
-     #   authenticator: service_authenticator
-     # provider: service_provider
+    logged_session:
+      pattern: ^/api/(users|history|borrow|book)
+      stateless: true
+      simple_preauth:
+        authenticator: user_authenticator
+      provider: session_provider
+
   encoders:
     App\Entity\User:
       algorithm: bcrypt

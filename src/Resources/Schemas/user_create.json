@@ -3,11 +3,6 @@
   "$id": "http://api/users_POST",
   "type": "object",
   "properties": {
-    "username": {
-      "type": "string",
-      "minLength": 5,
-      "maxLength": 64
-    },
     "email": {
       "type": "string",
       "maxLength": 64,
@@ -15,12 +10,11 @@
     },
     "password": {
       "type": "string",
-      "minLength": 8,
+      "minLength": 5,
       "maxLength": 20
     }
   },
   "required": [
-    "username",
     "email",
     "password"
   ],

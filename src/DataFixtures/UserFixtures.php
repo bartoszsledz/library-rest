@@ -40,7 +40,7 @@ class UserFixtures extends Fixture implements OrderedFixtureInterface
     public function load(ObjectManager $manager)
     {
         $user1 = new User([
-            'roles' => ['ROLE_USER'],
+            'roles' => [\App\Enums\User::ROLE_USER],
             'email' => 'user1@wp.pl',
             'public_id' => RandomGenerator::generateUniqueInteger(\App\Enums\User::LENGTH_UNIQUE)
         ]);

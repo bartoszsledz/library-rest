@@ -9,8 +9,10 @@
 namespace App\Controller;
 
 use App\Exceptions\BadRequestException;
+use Knp\Component\Pager\Pagination\AbstractPagination;
 use Opis\JsonSchema\{Validator, ValidationResult, Schema};
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\{Request};
 
 /**
@@ -18,7 +20,7 @@ use Symfony\Component\HttpFoundation\{Request};
  *
  * @package App\Controller
  */
-abstract class BaseController extends AbstractController
+abstract class BaseController extends Controller
 {
 
     /**
@@ -46,4 +48,18 @@ abstract class BaseController extends AbstractController
         throw new BadRequestException($result->getErrors());
     }
 
+    /**
+     * @param array $response
+     * @param AbstractPagination $pagination
+     * @return false|string
+     */
+    protected function paginate(array $response, AbstractPagination $pagination)
+    {
+        $tmp['data'] = $response;
+//        $response['pagination']['currentPageNumber'] = $pagination->getCurrentPageNumber();
+//        $response['pagination']['itemNumberPerPage'] = $pagination->getItemNumberPerPage();
+//        $response['pagination']['totalItemCount'] = $pagination->getTotalItemCount();
+
+        return json_encode($response);
+    }
 }

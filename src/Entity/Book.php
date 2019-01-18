@@ -64,6 +64,20 @@ class Book extends DataBaseEntity
     private $histories;
 
     /**
+     * @var PersistentCollection
+     *
+     * @ORM\OneToMany(targetEntity="App\Entity\Borrow", mappedBy="book")
+     */
+    private $borrows;
+
+    /**
+     * @var PersistentCollection
+     *
+     * @ORM\OneToMany(targetEntity="App\Entity\Review", mappedBy="book", cascade={"remove"})
+     */
+    private $reviews;
+
+    /**
      * Book constructor.
      *
      * @param array $data
@@ -72,6 +86,8 @@ class Book extends DataBaseEntity
     {
         parent::__construct($data);
         $this->histories = new ArrayCollection();
+        $this->borrows = new ArrayCollection();
+        $this->reviews = new ArrayCollection();
     }
 
     /**
@@ -103,13 +119,62 @@ class Book extends DataBaseEntity
     }
 
     /**
-     * @param History $histories
+     * @param History $history
      *
      * @return Book
      */
-    public function setHistories(History $histories): self
+    public function setHistories(History $history): self
     {
-        $this->histories[] = $histories;
+        if (!$this->histories->contains($history)) {
+            $this->histories[] = $history;
+            $history->setBook($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return PersistentCollection
+     */
+    public function getReviews(): PersistentCollection
+    {
+        return $this->reviews;
+    }
+
+    /**
+     * @param Review $reviews
+     *
+     * @return Book
+     */
+    public function setReviews(Review $reviews): self
+    {
+        if (!$this->reviews->contains($reviews)) {
+            $this->reviews[] = $reviews;
+            $reviews->setBook($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return PersistentCollection
+     */
+    public function getBorrows(): ?PersistentCollection
+    {
+        return $this->borrows;
+    }
+
+    /**
+     * @param Borrow $borrow
+     *
+     * @return Book
+     */
+    public function setBorrows(Borrow $borrow): self
+    {
+        if (!$this->borrows->contains($borrow)) {
+            $this->borrows[] = $borrow;
+            $borrow->setBook($this);
+        }
 
         return $this;
     }
@@ -199,7 +264,7 @@ class Book extends DataBaseEntity
      */
     public static function getLengthUnique(): int
     {
-       return \App\Enums\Book::LENGTH_UNIQUE;
+        return \App\Enums\Book::LENGTH_UNIQUE;
     }
 
     /**

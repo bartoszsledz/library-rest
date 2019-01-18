@@ -6,7 +6,6 @@
 
 namespace App\Entity;
 
-use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -25,24 +24,17 @@ class Borrow extends DataBaseEntity
      * @var User
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="borrows")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", nullable=false)
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
      */
     private $user;
 
     /**
      * @var Book
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Book", inversedBy="book")
-     * @ORM\JoinColumn(name="book_id", referencedColumnName="id", nullable=false)
+     * @ORM\ManyToOne(targetEntity="App\Entity\Book", inversedBy="borrows")
+     * @ORM\JoinColumn(name="book_id", referencedColumnName="id")
      */
     private $book;
-
-    /**
-     * @var DateTime
-     *
-     * @ORM\Column(type="datetime", options={"default":"CURRENT_TIMESTAMP"})
-     */
-    private $dateBorrow;
 
     /**
      * Borrow constructor.
@@ -90,27 +82,6 @@ class Borrow extends DataBaseEntity
     public function setBook(Book $book): self
     {
         $this->book = $book;
-
-        return $this;
-    }
-
-    /**
-     * @return DateTime
-     */
-    public function getDateBorrow(): ?DateTime
-    {
-        return $this->dateBorrow;
-    }
-
-    /**
-     * @ORM\PrePersist()
-     *
-     * @return Borrow
-     * @throws \Exception
-     */
-    public function setDateBorrow(): self
-    {
-        $this->dateBorrow = new DateTime();
 
         return $this;
     }

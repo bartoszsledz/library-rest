@@ -1,7 +1,7 @@
 <?php
 /**
  * @author: Bartosz Sledz <bartosz.sledz94@gmail.com>
- * @date: 01.12.18 23:07
+ * @date: 04.12.18 20:44
  */
 
 namespace App\Exceptions;
@@ -9,11 +9,11 @@ namespace App\Exceptions;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Class NotFoundException
+ * Class GeneralException
  *
  * @package App\Exceptions
  */
-class NotFoundException extends ApiException
+class GeneralException extends ApiException
 {
 
     /**
@@ -21,9 +21,9 @@ class NotFoundException extends ApiException
      *
      * @param array|string $errors
      */
-    public function __construct($errors = '')
+    public function __construct($errors = 'Error Occurred')
     {
-        parent::__construct(Response::HTTP_NOT_FOUND, $errors);
+        parent::__construct(Response::HTTP_BAD_REQUEST, $errors);
     }
-
+    
 }

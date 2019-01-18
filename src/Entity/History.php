@@ -24,7 +24,7 @@ class History extends DataBaseEntity
      * @var User
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="histories")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", nullable=false)
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $user;
 
@@ -32,14 +32,14 @@ class History extends DataBaseEntity
      * @var Book
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Book", inversedBy="histories")
-     * @ORM\JoinColumn(name="book_id", referencedColumnName="id", nullable=false)
+     * @ORM\JoinColumn(name="book_id", referencedColumnName="id")
      */
     private $book;
 
     /**
      * @var DateTime
      *
-     * @ORM\Column(type="datetime", options={"default":"CURRENT_TIMESTAMP"})
+     * @ORM\Column(type="datetime")
      */
     private $dateBorrow;
 
@@ -59,6 +59,10 @@ class History extends DataBaseEntity
     public function __construct(array $data = [])
     {
         parent::__construct($data);
+
+        if ($this->getDateReturn() === null) {
+            $this->setDateReturn(new DateTime());
+        }
     }
 
     /**
@@ -74,7 +78,7 @@ class History extends DataBaseEntity
      *
      * @return History
      */
-    public function setUser(User $user): self
+    public function setUser(?User $user): self
     {
         $this->user = $user;
 
@@ -94,7 +98,7 @@ class History extends DataBaseEntity
      *
      * @return History
      */
-    public function setBook(Book $book): self
+    public function setBook(?Book $book): self
     {
         $this->book = $book;
 
@@ -146,7 +150,7 @@ class History extends DataBaseEntity
      */
     public static function getLengthUnique(): int
     {
-        // TODO: Implement getLengthUnique() method.
+        return \App\Enums\History::LENGTH_UNIQUE;
     }
 
     /**
@@ -154,6 +158,6 @@ class History extends DataBaseEntity
      */
     public static function getEntityName(): string
     {
-        // TODO: Implement getEntityName() method.
+        return \App\Enums\History::MODEL;
     }
 }

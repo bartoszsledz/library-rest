@@ -39,9 +39,9 @@ class Session extends DataBaseEntity
      * @var User
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="sessions")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $user;
-    //, cascade="persist" -> aby nie blokowało usuniecia usera
 
     /**
      * @var bool

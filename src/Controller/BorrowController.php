@@ -6,13 +6,13 @@
 
 namespace App\Controller;
 
-use App\Annotation\CheckRequest;
-use App\Entity\Book;
 use App\Entity\Borrow;
-use App\Exceptions\BadRequestException;
-use App\Repository\BookRepository;
+use App\Entity\History;
+use App\Exceptions\GeneralException;
 use App\Repository\BorrowRepository;
-use Doctrine\Common\Persistence\ObjectManager;
+use DateTime;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\ORMException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,75 +28,7 @@ class BorrowController extends BaseController
 {
 
     /**
-     * @Route("/api/borrow", methods={"POST"}, name="boorow_book")
-     * @CheckRequest
-     *
-     * @SWG\Response(
-     *     response=200,
-     *     description="Correctly borrow the book."
-     * )
-     * @SWG\Response(
-     *     response=404,
-     *     description="Not found book to borrow."
-     * )
-     * @SWG\Response(
-     *     response=400,
-     *     description="Cannot borrow this book."
-     * )
-     * @SWG\Response(
-     *     response=401,
-     *     description="Unauthorized."
-     * )
-     * @SWG\Post(
-     *     @SWG\Parameter(
-     *         name="Request Body",
-     *         in="body",
-     *         description="JSON Payload",
-     *         required=true,
-     *         format="application/json",
-     *         @SWG\Schema(
-     *             type="object",
-     *             @SWG\Property(property="bookId", type="integer", example="12345678911")
-     *         )
-     *     )
-     * )
-     *
-     * @param Request $request
-     * @return JsonResponse
-     * @throws \App\Exceptions\NotFoundException
-     * @throws \App\Exceptions\BadRequestException
-     */
-    public function borrowBook(Request $request): JsonResponse
-    {
-        $data = $this->validateRequest($request, 'borrow_book');
-
-        /** @var ObjectManager $entityManager */
-        $entityManager = $this->getDoctrine()->getManager();
-
-        /** @var BookRepository $bookRepository */
-        $bookRepository = $entityManager->getRepository(Book::class);
-
-        $book = $bookRepository->getByPublicId($data['bookId']);
-
-        if (!$book->getAvailable()) {
-            throw new BadRequestException('Cannot borrow this book.');
-        }
-
-        $book->setAvailable(false);
-
-        $borrow = new Borrow();
-        $borrow->setUser($this->getUser());
-        $borrow->setBook($book);
-
-        $entityManager->merge($borrow);
-        $entityManager->flush();
-
-        return new JsonResponse(json_encode(['Id' => $borrow->getPublicId()]), Response::HTTP_OK, [], true);
-    }
-
-    /**
-     * @Route("/api/borrow/{id}", methods={"DELETE"}, requirements={"id"="\d+"}, name="borrow_delete")
-     * @CheckRequest
+     * @Route("/api/borrow/{id}/return", methods={"POST"}, requirements={"id"="\d+"}, name="borrow_return")
      *
      * @SWG\Response(
      *     response=200,
@@ -110,27 +42,41 @@ class BorrowController extends BaseController
      * @param Request $request
      * @return JsonResponse
      * @throws \App\Exceptions\NotFoundException
+     * @throws \Doctrine\DBAL\ConnectionException
+     * @throws GeneralException
      */
     public function delete(Request $request): JsonResponse
     {
         $borrowPublicId = (int)$request->get('id');
 
-        /** @var ObjectManager $entityManager */
+        /** @var EntityManager $entityManager */
         $entityManager = $this->getDoctrine()->getManager();
 
         /** @var BorrowRepository $borrowRepository */
         $borrowRepository = $entityManager->getRepository(Borrow::class);
 
-        /** @var BookRepository $bookRepository */
-        $bookRepository = $entityManager->getRepository(Book::class);
-
         $borrow = $borrowRepository->getByPublicId($borrowPublicId);
 
-        $book = $bookRepository->getById($borrow->getBook()->getId());
+        $book = $borrow->getBook();
         $book->setAvailable(true);
 
-        $entityManager->remove($borrow);
-        $entityManager->flush();
+        $history = new History([
+            'book' => $book,
+            'user' => $borrow->getUser(),
+            'dateBorrow' => $borrow->getCreated(),
+            'dateReturn' => new DateTime(),
+        ]);
+
+        $entityManager->getConnection()->beginTransaction();
+        try {
+            $entityManager->remove($borrow);
+            $entityManager->persist($history);
+            $entityManager->flush();
+            $entityManager->getConnection()->commit();
+        } catch (ORMException $e) {
+            $entityManager->getConnection()->rollBack();
+            throw new GeneralException();
+        }
 
         return new JsonResponse(json_encode([]), Response::HTTP_OK, [], true);
     }

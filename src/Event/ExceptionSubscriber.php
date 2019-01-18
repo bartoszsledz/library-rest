@@ -13,6 +13,8 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -38,9 +40,15 @@ class ExceptionSubscriber implements EventSubscriberInterface
             case $e instanceof UnauthorizedException:
                 $event->setResponse($this->handleUnauthorizedException($e));
                 break;
+            case $e instanceof AccessDeniedHttpException:
+                $event->setResponse($this->handleForbiddenException($e));
+                break;
             case $e instanceof NotFoundException:
-            case $e instanceof NotFoundHttpException:
                 $event->setResponse($this->handleNotFoundException($e));
+                break;
+            case $e instanceof NotFoundHttpException:
+            case $e instanceof MethodNotAllowedHttpException:
+                $event->setResponse($this->handleNotFoundRouteException($e));
                 break;
             case $e instanceof ApiException:
                 $event->setResponse($this->handleApiException($e));
@@ -96,15 +104,25 @@ class ExceptionSubscriber implements EventSubscriberInterface
         }
 
         if (is_array($errors) && $errors[0] instanceof ValidationError) {
-            $body['status'] = $e->getStatusCode();
+            //$body['status'] = $e->getStatusCode();
 
             /** @var ValidationError $error */
             foreach ($errors as $error) {
                 $dataPointer = $error->dataPointer();
                 if (isset($dataPointer[0])) {
-                    $body[$dataPointer[0]][$error->keyword()] = $error->keywordArgs();
+                    switch (true) {
+                        case isset($error->keywordArgs()['min']):
+                            $body['errors'] = 'The ' . $dataPointer[0] . ' must consist of at least ' . $error->keywordArgs()['min'] . ' characters.';
+                            break;
+                        case isset($error->keywordArgs()['max']):
+                            $body['errors'] = 'The ' . $dataPointer[0] . ' is too long. Maximum ' . $error->keywordArgs()['max'] . ' characters.';
+                            break;
+                        default:
+                            $body[$dataPointer[0]][$error->keyword()] = $error->keywordArgs();
+                            break;
+                    }
                 } else {
-                    $body[$error->keyword()] = $error->keywordArgs();
+                    $body['errors'][$error->keyword()] = $error->keywordArgs();
                 }
             }
 
@@ -180,6 +198,34 @@ class ExceptionSubscriber implements EventSubscriberInterface
         return new JsonResponse(
             json_encode(['errors' => Response::$statusTexts[Response::HTTP_UNAUTHORIZED]]),
             Response::HTTP_UNAUTHORIZED,
+            ['Content-Type' => 'application/problem+json'],
+            true
+        );
+    }
+
+    /**
+     * @param AccessDeniedHttpException $e
+     * @return JsonResponse
+     */
+    private function handleForbiddenException($e)
+    {
+        return new JsonResponse(
+            json_encode(['errors' => Response::$statusTexts[Response::HTTP_FORBIDDEN]]),
+            Response::HTTP_FORBIDDEN,
+            ['Content-Type' => 'application/problem+json'],
+            true
+        );
+    }
+
+    /**
+     * @param NotFoundHttpException $e
+     * @return JsonResponse
+     */
+    private function handleNotFoundRouteException($e)
+    {
+        return new JsonResponse(
+            json_encode(['errors' => Response::$statusTexts[Response::HTTP_METHOD_NOT_ALLOWED]]),
+            Response::HTTP_METHOD_NOT_ALLOWED,
             ['Content-Type' => 'application/problem+json'],
             true
         );

@@ -7,6 +7,7 @@
 namespace App\Repository;
 
 use App\Entity\User;
+use App\Exceptions\NotFoundException;
 use App\Exceptions\UnauthorizedException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
@@ -58,6 +59,23 @@ class UserRepository extends ServiceEntityRepository implements UserProviderInte
             ->setParameter('email', $username)
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    /**
+     * @param int $id
+     *
+     * @return User
+     * @throws \App\Exceptions\NotFoundException
+     */
+    public function getById(int $id): User
+    {
+        $entity = $this->findOneBy(['id' => $id]);
+
+        if ($entity instanceof User) {
+            return $entity;
+        }
+
+        throw new NotFoundException();
     }
 
     /**

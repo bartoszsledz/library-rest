@@ -6,15 +6,20 @@
 
 namespace App\Controller;
 
+use App\Entity\Borrow;
+use App\Entity\History;
 use App\Entity\Session;
 use App\Entity\User;
 use App\Enums\User as UserEnum;
 use App\Exceptions\BadRequestException;
+use App\Exceptions\NotFoundException;
 use App\Helpers\RandomGenerator;
+use App\Repository\BorrowRepository;
+use App\Repository\HistoryRepository;
+use App\Repository\SessionRepository;
 use App\Repository\UserRepository;
-use App\Services\UserService;
-use Doctrine\Common\Persistence\ObjectManager;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\ORM\EntityManager;
+use Knp\Component\Pager\Pagination\AbstractPagination;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -84,7 +89,7 @@ class UsersController extends BaseController
         $entityManager->persist($user);
         $entityManager->flush();
 
-        return new JsonResponse(json_encode(['status' => 'Created']), Response::HTTP_CREATED, [], true);
+        return new JsonResponse(json_encode([]), Response::HTTP_CREATED, [], true);
     }
 
     /**
@@ -101,7 +106,7 @@ class UsersController extends BaseController
     {
         $data = $this->validateRequest($request, 'user_auth');
 
-        /** @var ObjectManager $entityManager */
+        /** @var EntityManager $entityManager */
         $entityManager = $this->getDoctrine()->getManager();
 
         /** @var UserRepository $userRepository */
@@ -114,16 +119,122 @@ class UsersController extends BaseController
             $session->setToken(RandomGenerator::generateAuthToken());
             $session->setExpires(new \DateTime(\App\Enums\Session::SESSION_LIFE_TIME));
             $session->setIp($request->getClientIp() ?? '');
-            $session->setStatus(\App\Enums\Session::STATUS_ACTIVE);
+            $session->setStatus(true);
             $session->setUser($user);
 
             $entityManager->merge($session);
             $entityManager->flush();
 
-            return new JsonResponse(json_encode(['token' => $session->getToken()]), Response::HTTP_OK, [], true);
+            return new JsonResponse(json_encode(['token' => $session->getToken(), 'publicId' => $user->getPublicId()]), Response::HTTP_OK, [], true);
         }
 
         throw new BadRequestException('Bad login or password.');
+    }
+
+    /**
+     * @Route("/api/users/logout", methods={"DELETE"}, name="users_logout")
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     * @throws \Exception
+     */
+    public function logout(Request $request): JsonResponse
+    {
+        /** @var EntityManager $entityManager */
+        $entityManager = $this->getDoctrine()->getManager();
+
+        /** @var SessionRepository $sessionRepository */
+        $sessionRepository = $entityManager->getRepository(Session::class);
+
+        try {
+            $session = $sessionRepository->getByToken($request->headers->get('Authorization'));
+            $session->setStatus(false);
+
+            $entityManager->persist($session);
+            $entityManager->flush();
+        } catch (NotFoundException $exception) {
+        }
+
+        return new JsonResponse(json_encode([]), Response::HTTP_OK, [], true);
+    }
+
+    /**
+     * @Route("/api/users/borrows", methods={"GET"}, name="users_get_borrows")
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function getBorrow(Request $request): JsonResponse
+    {
+        /** @var EntityManager $entityManager */
+        $entityManager = $this->getDoctrine()->getManager();
+
+        /** @var BorrowRepository $borrowRepository */
+        $borrowRepository = $entityManager->getRepository(Borrow::class);
+
+        /* @var $paginator \Knp\Component\Pager\Paginator */
+        $paginator = $this->get('knp_paginator');
+
+        /** @var AbstractPagination $pagination */
+        $pagination = $paginator->paginate(
+            $borrowRepository->getAllBorrowForUserQuery($this->getUser()),
+            $request->query->getInt('page', 1),
+            10
+        );
+
+        $response = [];
+
+        /** @var Borrow $borrow */
+        foreach ($pagination->getItems() as $borrow) {
+            $response[] = [
+                'publicId' => $borrow->getPublicId(),
+                'bookId' => $borrow->getBook()->getPublicId(),
+                'borrowDate' => $borrow->getCreated()->format('c')
+            ];
+        }
+
+        return new JsonResponse($this->paginate($response, $pagination), Response::HTTP_OK, [], true);
+    }
+
+    /**
+     * @Route("/api/users/borrow-history", methods={"GET"}, name="users_get_borrow_history")
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function getBorrowHistory(Request $request): JsonResponse
+    {
+        /** @var EntityManager $entityManager */
+        $entityManager = $this->getDoctrine()->getManager();
+
+        /** @var HistoryRepository $historyRepository */
+        $historyRepository = $entityManager->getRepository(History::class);
+
+        /* @var $paginator \Knp\Component\Pager\Paginator */
+        $paginator = $this->get('knp_paginator');
+
+        /** @var AbstractPagination $pagination */
+        $pagination = $paginator->paginate(
+            $historyRepository->getAllHistoryForUserQuery($this->getUser()),
+            $request->query->getInt('page', 1),
+            10
+        );
+
+        $response = [];
+
+        /** @var History $history */
+        foreach ($pagination->getItems() as $history) {
+            $response[] = [
+                'bookId' => $history->getBook()->getPublicId(),
+                'borrowDate' => $history->getDateBorrow()->format('c'),
+                'returnDate' => $history->getDateReturn()->format('c')
+            ];
+        }
+
+        return new JsonResponse($this->paginate($response, $pagination), Response::HTTP_OK, [], true);
     }
 
 }

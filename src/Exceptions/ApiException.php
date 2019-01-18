@@ -32,6 +32,8 @@ abstract class ApiException extends \Exception
 
         $this->setStatusCode($statusCode);
         $this->setErrors($errors);
+
+        $this->saveLog($statusCode, $errors);
     }
 
     /**
@@ -64,6 +66,15 @@ abstract class ApiException extends \Exception
     public function setErrors($errors): void
     {
         $this->errors = $errors;
+    }
+
+    /**
+     * @param int $statusCode
+     * @param string|array $errors
+     */
+    private function saveLog(int $statusCode, $errors)
+    {
+        //todo
     }
 
 }

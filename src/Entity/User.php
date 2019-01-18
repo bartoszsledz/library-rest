@@ -8,7 +8,6 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\Mapping\OrderBy;
 use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -49,7 +48,7 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
     /**
      * @var PersistentCollection
      *
-     * @ORM\OneToMany(targetEntity="App\Entity\History", mappedBy="user")
+     * @ORM\OneToMany(targetEntity="App\Entity\History", mappedBy="user", cascade={"remove"})
      */
     private $histories;
 
@@ -63,9 +62,16 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
     /**
      * @var PersistentCollection
      *
-     * @ORM\OneToMany(targetEntity="App\Entity\Session", mappedBy="user")
+     * @ORM\OneToMany(targetEntity="App\Entity\Session", mappedBy="user", cascade={"remove"})
      */
     private $sessions;
+
+    /**
+     * @var PersistentCollection
+     *
+     * @ORM\OneToMany(targetEntity="App\Entity\Review", mappedBy="user", cascade={"remove"})
+     */
+    private $reviews;
 
     /**
      * User constructor.
@@ -78,6 +84,7 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
         $this->histories = new ArrayCollection();
         $this->sessions = new ArrayCollection();
         $this->borrows = new ArrayCollection();
+        $this->reviews = new ArrayCollection();
     }
 
     /**
@@ -95,10 +102,32 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
      */
     public function setHistories(History $history): self
     {
-        if (!$this->histories->contains($history))
-        {
+        if (!$this->histories->contains($history)) {
             $this->histories[] = $history;
             $history->setUser($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return PersistentCollection
+     */
+    public function getReviews(): PersistentCollection
+    {
+        return $this->reviews;
+    }
+
+    /**
+     * @param Review $reviews
+     *
+     * @return User
+     */
+    public function setReviews(Review $reviews): self
+    {
+        if (!$this->reviews->contains($reviews)) {
+            $this->reviews[] = $reviews;
+            $reviews->setUser($this);
         }
 
         return $this;
@@ -151,8 +180,7 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
      */
     public function setBorrow(Borrow $borrow): self
     {
-        if (!$this->borrows->contains($borrow))
-        {
+        if (!$this->borrows->contains($borrow)) {
             $this->borrows[] = $borrow;
             $borrow->setUser($this);
         }
@@ -195,8 +223,7 @@ class User extends DataBaseEntity implements UserInterface, \Serializable
      */
     public function setSession(Session $session): self
     {
-        if (!$this->sessions->contains($session))
-        {
+        if (!$this->sessions->contains($session)) {
             $this->sessions[] = $session;
             $session->setUser($this);
         }

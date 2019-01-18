@@ -21,7 +21,7 @@ class BadRequestException extends ApiException
      *
      * @param array|string $errors
      */
-    public function __construct($errors = [])
+    public function __construct($errors = '')
     {
         parent::__construct(Response::HTTP_BAD_REQUEST, $errors);
     }

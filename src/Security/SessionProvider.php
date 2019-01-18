@@ -66,7 +66,7 @@ class SessionProvider implements UserProviderInterface
             ->andWhere('s.status = :status')
             ->andWhere('s.expires > :expires')
             ->setParameter('token', $token)
-            ->setParameter('status', \App\Enums\Session::STATUS_ACTIVE)
+            ->setParameter('status', true)
             ->setParameter('expires', (new \DateTime())->format('Y-m-d H:i:s'))
             ->setMaxResults(1)
             ->getQuery()
@@ -75,6 +75,10 @@ class SessionProvider implements UserProviderInterface
         if (!($session instanceof Session)) {
             throw new UnauthorizedException(sprintf('Session token "%s" does not exist.', $token));
         }
+
+        $session->setExpires(new \DateTime(\App\Enums\Session::SESSION_LIFE_TIME));
+        $this->entityManager->persist($session);
+        $this->entityManager->flush();
 
         return $session;
     }

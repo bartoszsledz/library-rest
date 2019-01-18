@@ -39,9 +39,25 @@ class SessionRepository extends EntityRepository
      * @return Session
      * @throws NotFoundException
      */
-    public function getById(int $id)
+    public function getById(int $id): Session
     {
         $entity = $this->findOneBy(['id' => $id]);
+
+        if ($entity && $entity instanceof Session) {
+            return $entity;
+        }
+
+        throw new NotFoundException();
+    }
+
+    /**
+     * @param string $token
+     * @return Session
+     * @throws NotFoundException
+     */
+    public function getByToken($token): Session
+    {
+        $entity = $this->findOneBy(['token' => $token]);
 
         if ($entity && $entity instanceof Session) {
             return $entity;

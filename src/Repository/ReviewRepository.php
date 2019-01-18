@@ -1,35 +1,36 @@
 <?php
 /**
  * @author: Bartosz Sledz <bartosz.sledz94@gmail.com>
- * @date: 24.11.2018 18:36
+ * @date: 09.12.18 19:29
  */
 
 namespace App\Repository;
 
+
 use App\Entity\Book;
-use App\Entity\Borrow;
-use App\Entity\User;
+use App\Entity\DataBaseEntity;
+use App\Entity\Review;
 use App\Exceptions\NotFoundException;
 
 /**
- * Class BorrowRepository
+ * Class ReviewRepository
  *
  * @package App\Repository
  */
-class BorrowRepository extends EntityRepository
+class ReviewRepository extends EntityRepository
 {
 
     /**
      * @param int $publicId
      *
-     * @return Borrow
-     * @throws \App\Exceptions\NotFoundException
+     * @return DataBaseEntity
+     * @throws NotFoundException
      */
-    public function getByPublicId(int $publicId): Borrow
+    public function getByPublicId(int $publicId)
     {
         $entity = $this->findOneBy(['public_id' => $publicId]);
 
-        if ($entity instanceof Borrow) {
+        if ($entity instanceof Review) {
             return $entity;
         }
 
@@ -39,14 +40,14 @@ class BorrowRepository extends EntityRepository
     /**
      * @param int $id
      *
-     * @return Borrow
+     * @return DataBaseEntity
      * @throws NotFoundException
      */
     public function getById(int $id)
     {
         $entity = $this->findOneBy(['id' => $id]);
 
-        if ($entity && $entity instanceof Borrow) {
+        if ($entity instanceof Review) {
             return $entity;
         }
 
@@ -54,16 +55,17 @@ class BorrowRepository extends EntityRepository
     }
 
     /**
-     * @param User $user
+     * @param Book $book
      * @return \Doctrine\ORM\Query
      */
-    public function getAllBorrowForUserQuery($user)
+    public function getAllReviewsForBookQuery($book)
     {
-        return $this->createQueryBuilder('borrow')
-            ->select('borrow, book')
-            ->leftJoin('borrow.book', 'book')
-            ->andWhere('borrow.user = :user')
-            ->setParameter('user', $user)
+        return $this->createQueryBuilder('review')
+            ->select('review, book, user')
+            ->leftJoin('review.book', 'book')
+            ->leftJoin('review.user', 'user')
+            ->andWhere('review.book = :book')
+            ->setParameter('book', $book)
             ->getQuery();
     }
 

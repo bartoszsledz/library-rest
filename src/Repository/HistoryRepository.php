@@ -7,6 +7,7 @@
 namespace App\Repository;
 
 use App\Entity\History;
+use App\Entity\User;
 use App\Exceptions\NotFoundException;
 
 /**
@@ -49,6 +50,20 @@ class HistoryRepository extends EntityRepository
         }
 
         throw new NotFoundException();
+    }
+
+    /**
+     * @param User $user
+     * @return \Doctrine\ORM\Query
+     */
+    public function getAllHistoryForUserQuery($user)
+    {
+        return $this->createQueryBuilder('history')
+            ->select('history, book')
+            ->leftJoin('history.book', 'book')
+            ->andWhere('history.user = :user')
+            ->setParameter('user', $user)
+            ->getQuery();
     }
 
 }

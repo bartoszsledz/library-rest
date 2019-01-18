@@ -1,40 +1,42 @@
 <?php
 /**
  * @author: Bartosz Sledz <bartosz.sledz94@gmail.com>
- * @date: 03.12.18 20:53
+ * @date: 05.12.18 17:34
  */
 
 namespace App\DataFixtures;
 
-use App\Entity\Borrow;
+use App\Entity\History;
 use App\Helpers\RandomGenerator;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
 /**
- * Class BorrowFixtures
+ * Class BorrowHistoryFixtures
  *
  * @package App\DataFixtures
  */
-class BorrowFixtures extends Fixture implements OrderedFixtureInterface
+class BorrowHistoryFixtures extends Fixture implements OrderedFixtureInterface
 {
 
     /**
      * Load data fixtures with the passed EntityManager
      *
      * @param ObjectManager $manager
+     * @throws \Exception
      */
     public function load(ObjectManager $manager)
     {
-        $borrow = new Borrow([
-            'public_id' => RandomGenerator::generateUniqueInteger(\App\Enums\Borrow::LENGTH_UNIQUE)
+        $history = new History([
+            'public_id' => RandomGenerator::generateUniqueInteger(\App\Enums\History::LENGTH_UNIQUE),
+            'date_borrow' => new \DateTime()
         ]);
 
-        $manager->persist($borrow);
+        $manager->persist($history);
 
-        $borrow->setUser($manager->merge($this->getReference('user1')));
-        $borrow->setBook($manager->merge($this->getReference('book1')));
+        $history->setUser($manager->merge($this->getReference('user1')));
+        $history->setBook($manager->merge($this->getReference('book2')));
 
         $manager->flush();
     }
@@ -46,6 +48,6 @@ class BorrowFixtures extends Fixture implements OrderedFixtureInterface
      */
     public function getOrder()
     {
-        return 3;
+        return 4;
     }
 }
